@@ -1,4 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
+using Mysqlx.Crud;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,11 +22,11 @@ namespace AltınHesapAdmin
         {
             InitializeComponent();
         }
-
-        private void Form1_Load(object sender, EventArgs e)
+        int rowindex=0;
+        public void GetData()
         {
             string connectionString = "Server=213.238.183.62;Database=altewebt_Jewelry;Uid=altewebt_jewelry_user;Pwd='1810Umut+';";
-            
+
             //info being your table name
             MySqlConnection mysqlCon = new
 
@@ -40,20 +42,20 @@ namespace AltınHesapAdmin
 
             BindingSource bSource = new BindingSource();
             bSource.DataSource = table;
-
+            
             dataGridView1.DataSource = bSource;
 
-                //gets a collection that contains all the rows
-                DataGridViewRow row = this.dataGridView1.Rows[0];
-                //populate the textbox from specific value of the coordinates of column and row.
-                label1.Text = row.Cells[0].Value.ToString();
-                textBox1.Text = row.Cells[1].Value.ToString();
-                textBox2.Text = row.Cells[2].Value.ToString();
-                textBox3.Text = row.Cells[3].Value.ToString();
-                textBox4.Text = row.Cells[4].Value.ToString();
-                textBox5.Text = row.Cells[5].Value.ToString();
+            //gets a collection that contains all the rows
+            DataGridViewRow row = this.dataGridView1.Rows[rowindex];
+            //populate the textbox from specific value of the coordinates of column and row.
+            label1.Text = row.Cells[0].Value.ToString();
+            textBox1.Text = row.Cells[1].Value.ToString();
+            textBox2.Text = row.Cells[2].Value.ToString();
+            textBox3.Text = row.Cells[3].Value.ToString();
+            textBox4.Text = row.Cells[4].Value.ToString();
+            textBox5.Text = row.Cells[5].Value.ToString();
 
-                string text= row.Cells[6].Value.ToString();
+            string text = row.Cells[6].Value.ToString();
 
             List<String> _ayarList = new List<String>();
 
@@ -77,13 +79,19 @@ namespace AltınHesapAdmin
 
 
 
-            dataGridView1.Columns[0].Width = 50;           
+            dataGridView1.Columns[0].Width = 50;
             dataGridView1.Columns[5].Width = 100;
             dataGridView1.Columns[2].Width = 200;
 
             dataGridView2.Columns[1].Width = 40;
             dataGridView2.Columns[2].Width = 40;
 
+            dataGridView1.CurrentCell = dataGridView1.Rows[rowindex].Cells[0];
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            GetData();
 
 
 
@@ -93,6 +101,7 @@ namespace AltınHesapAdmin
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
+            rowindex = e.RowIndex;
             if (e.RowIndex >= 0)
             {
 
@@ -134,10 +143,13 @@ namespace AltınHesapAdmin
         {
             try
             {
+                DateTime dateValue = DateTime.Parse(textBox4.Text);
+                string formatForMySql = dateValue.ToString("yyyy-MM-dd HH:mm");
+
                 //This is my connection string i have assigned the database file address path
                 string MyConnection2 = "Server=213.238.183.62;Database=altewebt_Jewelry;Uid=altewebt_jewelry_user;Pwd='1810Umut+';";
                 //This is my update query in which i am taking input from the user through windows forms and update the record.
-                string Query = "update PCs set Active='" + this.textBox5.Text + "' where id='" + this.label1.Text + "';";
+                string Query = "update PCs set Active='" + textBox5.Text + "', Date_Last='"+ formatForMySql + "'  where id='" + this.label1.Text + "';";
                 //This is  MySqlConnection here i have created the object and pass my connection string.
                 MySqlConnection MyConn2 = new MySqlConnection(MyConnection2);
                 MySqlCommand MyCommand2 = new MySqlCommand(Query, MyConn2);
@@ -149,6 +161,7 @@ namespace AltınHesapAdmin
                 {
                 }
                 MyConn2.Close();//Connection closed here
+                GetData();
             }
             catch (Exception ex)
             {
